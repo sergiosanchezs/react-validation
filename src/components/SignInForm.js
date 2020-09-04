@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AccountCircle as AccountCircleIcon } from '@material-ui/icons';
+import { DevTool } from '@hookform/devtools';
 import {
   Avatar,
   Grid,
@@ -16,12 +17,21 @@ import { useForm, Controller } from 'react-hook-form';
 
 const SignInForm = () => {
   const classes = useStyles();
-  const { register, handleSubmit, errors, control } = useForm();
+  const { register, handleSubmit, control, errors } = useForm({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      email: '',
+      password: '',
+      remember: true,
+    },
+  });
 
-  const onSubmit = data => console.log(data); //alert(JSON.stringify(data));
+  const onSubmit = data => alert(JSON.stringify(data));
 
   return (
     <Container component='main' maxWidth='xs'>
+      <DevTool control={control} />
       <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
@@ -48,6 +58,7 @@ const SignInForm = () => {
               },
             })}
             autoComplete='email'
+            error={!!errors.email}
             className={classes.margin}
             fullWidth
             autoFocus
@@ -63,11 +74,12 @@ const SignInForm = () => {
             margin='normal'
             inputRef={register({
               required: 'You must provide a password.',
-              minLenght: {
+              minLength: {
                 value: 6,
                 message: 'Your password must be greater than 6 characters',
               },
             })}
+            error={!!errors.password}
             fullWidth
             autoComplete='current-password'
           />
@@ -84,23 +96,41 @@ const SignInForm = () => {
             <Grid item>
               <FormControlLabel
                 label='Remember me'
+                name='remember'
                 control={
-                  <Controller
+                  <Checkbox
                     className={classes.checkBox}
-                    name='remember'
-                    as={Checkbox}
-                    control={control}
-                    defaultValue={false}
+                    inputRef={register()}
                   />
                 }
               />
             </Grid>
+          </Grid>
+          <Grid container>
+            <FormControlLabel
+              control={
+                <Controller
+                  control={control}
+                  name='checkTest'
+                  defaultValue={true}
+                  render={({ onChange, value }) => (
+                    <Checkbox
+                      className={classes.checkBox}
+                      onChange={e => onChange(e.target.checked)}
+                      checked={value}
+                    />
+                  )}
+                />
+              }
+              label='Checkbox with Controller and render'
+            />
           </Grid>
 
           <Button
             type='submit'
             fullWidth
             variant='contained'
+            disabled={!!errors.email || !!errors.password}
             className={classes.submit}
           >
             Sign In
